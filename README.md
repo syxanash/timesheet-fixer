@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-This is a quick a dirty bookmarklet I developed for a [timesheet](https://en.wikipedia.org/wiki/Timesheet) web application I was using in a company. Due to the complexity of the application sometimes it was easy to mess up the minutes for each task, so I created this script for my coworkers to make sure that timesheet page is valid before the project manager closed the month.
+This is a quick a dirty bookmarklet I developed for a [timesheet](https://en.wikipedia.org/wiki/Timesheet) web application I was using in a company. Due to the complexity of the application sometimes it was easy to mess up the minutes for each task, so I created this script for my coworkers to make sure that timesheet page is valid before the project manager closes the month.
 
 Some of the checks are listed below:
 
