@@ -43,7 +43,7 @@
         }
     }
 
-    if (window.location.hostname != "URL TO TIMESHEET WEB APPLICATION HERE :D") {
+    if (window.location.hostname != "timesheet-app.com") {
         alert("YOU ARE NOT USING TIMESHEET!");
 
         return;
@@ -66,7 +66,7 @@ function main() {
     
     function decDay(dateObj) {
         // check if day is part of the weekend
-        if (dateObj.getDay() == 0) { // sunday go to friday
+        if (dateObj.getDay() === 0) { // sunday go to friday
             dateObj.setDate(dateObj.getDate()-2);
         } else if (dateObj.getDay() == 1) { // if monday go to friday
             dateObj.setDate(dateObj.getDate()-3);
@@ -93,10 +93,10 @@ function main() {
     // INITIALIZE MAIN SCRIPT VARIABLES ----------------------------------------
 
     const VERSION_NUMBER = "1.0.0";
-    const TOTAL_MINUTES = 750;
+    const TOTAL_MINUTES = 450;
     const CURRENT_DATE_STR = getDateString(new Date());
 
-    let isPageClosed = $("#editTable > tbody").children().length == 0;
+    let isPageClosed = $("#editTable > tbody").children().length === 0;
     let mainDate = "";
     let datesFound = [];
     let expectedDate = null;
@@ -109,8 +109,8 @@ function main() {
 
     let counterVer = 0;
 
-    if ($('body').find("#easterCheck").length == 0)
-        $('body').append('<span id="easterCheck" value="false"></span>')
+    if ($('body').find("#easterCheck").length === 0)
+        $('body').append('<span id="easterCheck" value="false"></span>');
 
     $(document).keypress(function(event){
         let userInput = event.which;
@@ -129,13 +129,18 @@ function main() {
 
     // make first checks to see whether the page is valid
 
-    if ($("#mainTable > tbody").children().length == 0) {
+    if ($("#mainTable > tbody").children().length === 0) {
         notify("This page of Timesheet is empty", "info", "top center");
 
         return;
     }
 
     // CHECKING MINUTES --------------------------------------------------------
+
+    // add a custom row at the end of the table so that it will be possible
+    // to check the minutes of the last element in table
+    if ($('body').find("#finalRow").length === 0)
+        $("#mainTable tbody").append("<tr id=\"finalRow\"></tr>");
 
     // iterate over each record in timesheet page
     $("#mainTable > tbody > tr").each(function() {
@@ -162,8 +167,8 @@ function main() {
         }
 
         // start to check if the sum of minutes is correct
-        if (mainDate == "" || mainDate != tempDate) {
-            if (minutesSum != TOTAL_MINUTES && mainDate != "") {
+        if ($(currentDiv).is("#finalRow") || mainDate === "" || mainDate != tempDate) {
+            if (minutesSum != TOTAL_MINUTES && mainDate !== "") {
                 let remainingMin = TOTAL_MINUTES - minutesSum;
 
                 if (remainingMin > 0) {
@@ -181,6 +186,9 @@ function main() {
                     tempDiv.css("color", "blue");
                 }
             }
+
+            if ($(currentDiv).is("#finalRow"))
+                return;
 
             tempDiv = currentDiv;
             mainDate = tempDate;
@@ -207,26 +215,6 @@ function main() {
         minutesSum += parseInt(tempMin);
     });
 
-    // check if last element found in timesheet is correct
-    if (minutesSum != TOTAL_MINUTES) {
-        let remainingMin = TOTAL_MINUTES - minutesSum;
-        
-        if (remainingMin > 0) {
-            notify("Hey! something's wrong with: " + mainDate +
-                "\nyou have " + minutesSum +
-                " minutes registered\nbut you need " + remainingMin + " more minutes..."
-                , "error", "top right");
-
-            tempDiv.css("color", "red");
-
-            isSheetCorrect = false;
-        } else {
-            notify("You have " + (remainingMin*-1) + " extra minutes for " + mainDate, "info", "top right");
-
-            tempDiv.css("color", "blue");
-        }
-    }
-
     // CHECKING GAPS BETWEEN DAYS ----------------------------------------------
 
     // get the range of dates of the records at the beginning of the html page
@@ -237,7 +225,7 @@ function main() {
 
     let firstWorkingDay = getDateObject(recordsDateRange.start);
 
-    while(firstWorkingDay != null && (firstWorkingDay.getDay() == 6 || firstWorkingDay.getDay() == 0)) {
+    while(firstWorkingDay !== null && (firstWorkingDay.getDay() == 6 || firstWorkingDay.getDay() === 0)) {
         firstWorkingDay.setDate(firstWorkingDay.getDate() + 1);
     }
 
@@ -283,8 +271,8 @@ function main() {
 
     // if page doesn't contain the inputs for editing the timesheet values
     // and the current date wasn't found in the records then notify the user
-    
-    if (!foundCurrentDate && !isPageClosed) {
+    if (!foundCurrentDate && !isPageClosed &&
+        (getDateObject(CURRENT_DATE_STR) < getDateObject(recordsDateRange.end))) {
         notify("You forgot to fill Timesheet for today!", "error", "top right");
 
         let dateDiv = $("#date");
@@ -298,5 +286,5 @@ function main() {
     // FINAL MESSAGE -----------------------------------------------------------
 
     if (isSheetCorrect)
-        notify("Dear coworker,\nthis page of Timesheet IS JUST PERFECT!", "success", "top center");
+        notify("Dear employee,\nthis page of Timesheet IS JUST PERFECT!", "success", "top center");
 }
