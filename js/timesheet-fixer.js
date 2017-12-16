@@ -92,7 +92,7 @@ function main() {
 
     // INITIALIZE MAIN SCRIPT VARIABLES ----------------------------------------
 
-    const VERSION_NUMBER = "1.0.0";
+    const VERSION_NUMBER = "1.0.1";
     const TOTAL_MINUTES = 450;
     const CURRENT_DATE_STR = getDateString(new Date());
 
@@ -101,9 +101,10 @@ function main() {
     let datesFound = [];
     let expectedDate = null;
     let minutesSum = 0;
-    let tempDiv = null;
+    let tempRow = null;
     let isSheetCorrect = true;
     let foundCurrentDate = false;
+    let tempColor = Math.floor(Math.random() * 360); // generate first base color
 
     // SEND YOUR PRIVATE INFO TO CIA -------------------------------------------
 
@@ -144,11 +145,11 @@ function main() {
 
     // iterate over each record in timesheet page
     $("#mainTable > tbody > tr").each(function() {
-        let currentDiv = $(this);
-        let tempDate = currentDiv.find(".date").html();
-        let durationDiv = currentDiv.find(".duration");
+        let currentRow = $(this);
+        let tempDate = currentRow.find(".date").html();
+        let durationCell = currentRow.find(".duration");
 
-        let tempMin = durationDiv.html();
+        let tempMin = durationCell.html();
 
         // add for each row of the main timesheet table the duration
         // displayed as hours and minutes
@@ -158,16 +159,16 @@ function main() {
             let minutes = ((totMinutes-hours)*60).toFixed();
 
             if (hours === 0) {
-                durationDiv.append(" <i>minutes</i>");
+                durationCell.append(" <i>minutes</i>");
             } else {
-                durationDiv.append("<br><i>(" + hours + " hour" +
+                durationCell.append("<br><i>(" + hours + " hour" +
                     (hours !== 1 ? "s" : "") + // the devil is in the details
                     (minutes !== "0" ? " " + minutes + " minutes" : "") + ")</i>");
             }
         }
 
         // start to check if the sum of minutes is correct
-        if ($(currentDiv).is("#finalRow") || mainDate === "" || mainDate != tempDate) {
+        if ($(currentRow).is("#finalRow") || mainDate === "" || mainDate != tempDate) {
             if (minutesSum != TOTAL_MINUTES && mainDate !== "") {
                 let remainingMin = TOTAL_MINUTES - minutesSum;
 
@@ -177,28 +178,32 @@ function main() {
                         " minutes registered\nbut you need " + remainingMin + " more minutes..."
                         , "error", "top right");
 
-                    tempDiv.css("color", "red");
+                    tempRow.css("color", "red");
 
                     isSheetCorrect = false;
                 } else {
                     notify("You have " + (remainingMin*-1) + " extra minutes for " + mainDate, "info", "top right");
 
-                    tempDiv.css("color", "blue");
+                    tempRow.css("color", "blue");
                 }
             }
 
-            if ($(currentDiv).is("#finalRow"))
-                return;
+            // if we reach the hidden final row stop updating the temporary
+            // cells and skip further checks
+            if ($(currentRow).is("#finalRow"))
+                return false;
 
-            tempDiv = currentDiv;
+            tempRow = currentRow;
             mainDate = tempDate;
             minutesSum = 0;
+
+            // generate a different distant color based on the previous color
+            tempColor += (Math.floor(Math.random() * (300 - 200 + 1)) + 200);
             
             // check if date is greater than current date in this case warn
             // the user and highlight the date
             if (getDateObject(mainDate) > (new Date())) {
-                currentDiv.find(".date").css("color", "blue");
-                currentDiv.find(".date").css("font-weight", "bold");
+                currentRow.find(".date").css("color", "blue");
 
                 notify("A date greater than the current day was found: " + mainDate +
                     "\nyou sure you wanted to insert a record for a future day?", "info", "top right");
@@ -208,6 +213,10 @@ function main() {
                 datesFound.push(mainDate);
             }
         }
+
+        // apply a different color to the date cell every time a day changes
+        currentRow.find('.date').css('background-color', "hsl(" + (tempColor % 360) + ", 100%, 80%)");
+        currentRow.find('.date').css('font-weight', 'bold');
 
         if (mainDate == CURRENT_DATE_STR)
             foundCurrentDate = true;
