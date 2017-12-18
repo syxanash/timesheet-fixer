@@ -10,7 +10,6 @@ Some of the features are:
 * check if working hours are correct
 * warn if user has extra hours for a working day
 * warn if user has a future date compared to the current one
-* randomly color the date cells to clearly distinguish each day
 
 ## About
 
@@ -20,12 +19,6 @@ This script was developed to learn a bunch of things with JavaScript. [Babel](ht
 
 Some notifications which popped up when executing the bookmarklet:
 
-![screen_win](img/screen_win.png)
+![screen1](img/screen1.png)
 
-or on macOS:
-
-![screen_mac](img/screen_mac.png)
-
-or if timesheet was valid and user had extra minutes for a working day:
-
-![screen2](img/screen2.png)
+![screen_mac](img/screen2.png)

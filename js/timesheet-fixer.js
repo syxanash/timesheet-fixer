@@ -104,7 +104,7 @@ function main() {
     let tempRow = null;
     let isSheetCorrect = true;
     let foundCurrentDate = false;
-    let tempColor = Math.floor(Math.random() * 360); // generate first base color
+    let warningIssued = false;
 
     // SEND YOUR PRIVATE INFO TO CIA -------------------------------------------
 
@@ -179,12 +179,17 @@ function main() {
                         , "error", "top right");
 
                     tempRow.css("color", "red");
+                    tempRow.css('background-color', "hsl(0, 100%, 90%)");
 
                     isSheetCorrect = false;
                 } else {
                     notify("You have " + (remainingMin*-1) + " extra minutes for " + mainDate, "info", "top right");
 
                     tempRow.css("color", "blue");
+                    tempRow.css('background-color', "hsl(240, 100%, 90%)");
+                    tempRow.find(".duration").css("font-weight", "bold");
+                    
+                    warningIssued = true;
                 }
             }
 
@@ -196,14 +201,14 @@ function main() {
             tempRow = currentRow;
             mainDate = tempDate;
             minutesSum = 0;
-
-            // generate a different distant color based on the previous color
-            tempColor += (Math.floor(Math.random() * (300 - 200 + 1)) + 200);
             
             // check if date is greater than current date in this case warn
             // the user and highlight the date
             if (getDateObject(mainDate) > (new Date())) {
                 currentRow.find(".date").css("color", "blue");
+                currentRow.find(".date").css('background-color', "hsl(240, 100%, 90%)");
+                currentRow.find(".date").css("font-weight", "bold");
+                warningIssued = true;
 
                 notify("A date greater than the current day was found: " + mainDate +
                     "\nyou sure you wanted to insert a record for a future day?", "info", "top right");
@@ -213,10 +218,6 @@ function main() {
                 datesFound.push(mainDate);
             }
         }
-
-        // apply a different color to the date cell every time a day changes
-        currentRow.find('.date').css('background-color', "hsl(" + (tempColor % 360) + ", 100%, 80%)");
-        currentRow.find('.date').css('font-weight', 'bold');
 
         if (mainDate == CURRENT_DATE_STR)
             foundCurrentDate = true;
@@ -294,6 +295,11 @@ function main() {
 
     // FINAL MESSAGE -----------------------------------------------------------
 
-    if (isSheetCorrect)
-        notify("Dear employee,\nthis page of Timesheet IS JUST PERFECT!", "success", "top center");
+    if (isSheetCorrect) {
+        let finalMessage = (warningIssued
+                ? "Dear employee,\nthis page of Timesheet looks good\nhowever see blue notifications..."
+                : "Dear employee,\nthis page of Timesheet IS JUST PERFECT!");
+
+        notify(finalMessage, "success", "top center");
+    }
 }
